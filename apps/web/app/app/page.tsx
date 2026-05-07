@@ -4,7 +4,7 @@ import { KnowledgeGraph } from "@/components/KnowledgeGraph";
 import { MetricCard } from "@/components/MetricCard";
 import { PaperFeedCard } from "@/components/PaperFeedCard";
 import { WeeklyMemoPreview } from "@/components/WeeklyMemoPreview";
-import { demoProfile, feedPapers, graphEdges, graphNodes, thesisReport } from "@/lib/mock-data";
+import { demoProfile, feedPapers, graphEdges, graphNodes, graphPaths, thesisReport } from "@/lib/mock-data";
 
 export default function AppHomePage() {
   return (
@@ -44,7 +44,7 @@ export default function AppHomePage() {
           </div>
           <div className="panel span-12">
             <h3>Current graph</h3>
-            <KnowledgeGraph nodes={graphNodes} edges={graphEdges} />
+            <KnowledgeGraph nodes={graphNodes} edges={graphEdges} paths={graphPaths} compact />
           </div>
         </section>
       </div>

@@ -2,7 +2,7 @@ import { ArrowRight, Brain, GitBranch, MessageSquare, Network, Repeat2, Sparkles
 import Link from "next/link";
 import { KnowledgeGraph } from "@/components/KnowledgeGraph";
 import { PaperFeedCard } from "@/components/PaperFeedCard";
-import { feedPapers, graphEdges, graphNodes, thesisReport } from "@/lib/mock-data";
+import { feedPapers, graphEdges, graphNodes, graphPaths, thesisReport } from "@/lib/mock-data";
 
 export default function HomePage() {
   return (
@@ -60,7 +60,7 @@ export default function HomePage() {
         </div>
         <div className="panel span-7">
           <h3>Graph-first product wedge</h3>
-          <KnowledgeGraph nodes={graphNodes} edges={graphEdges} />
+          <KnowledgeGraph nodes={graphNodes} edges={graphEdges} paths={graphPaths} compact />
         </div>
         <div className="panel span-5">
           <MessageSquare color="var(--green)" />

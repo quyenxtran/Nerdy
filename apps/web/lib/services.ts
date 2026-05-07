@@ -3,6 +3,7 @@ import {
   feedPapers,
   graphEdges,
   graphNodes,
+  graphPaths,
   sharePosts,
   thesisReport
 } from "./mock-data";
@@ -154,10 +155,11 @@ export function getGraph(): GraphResponse {
   const nodes = [...graphNodes];
   const edges = [...graphEdges];
 
-  return {
-    nodes,
-    edges,
-    stats: {
+    return {
+      nodes,
+      edges,
+      paths: graphPaths,
+      stats: {
       nodeCount: nodes.length,
       edgeCount: edges.length,
       paperCount: nodes.filter((node) => node.type === "paper").length,

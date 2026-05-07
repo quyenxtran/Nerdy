@@ -1,6 +1,6 @@
 import { AppShell } from "@/components/AppShell";
 import { KnowledgeGraph } from "@/components/KnowledgeGraph";
-import { graphEdges, graphNodes } from "@/lib/mock-data";
+import { graphEdges, graphNodes, graphPaths } from "@/lib/mock-data";
 
 export default function GraphPage() {
   return (
@@ -17,18 +17,8 @@ export default function GraphPage() {
           <span className="tag">thesis</span>
         </div>
       </header>
-      <section className="grid">
-        <div className="panel span-12 graph-panel">
-          <KnowledgeGraph nodes={graphNodes} edges={graphEdges} />
-        </div>
-        <aside className="panel span-12">
-          <h3>Selected path</h3>
-          <ul className="insight-list path-list">
-            <li>Shape descriptor paper -&gt; USES -&gt; family-based validation</li>
-            <li>cross descriptors -&gt; IMPROVES -&gt; LOAO thesis</li>
-            <li>molecule-only features fail -&gt; RELEVANT_TO -&gt; LOAO thesis</li>
-          </ul>
-        </aside>
+      <section className="graph-panel">
+        <KnowledgeGraph nodes={graphNodes} edges={graphEdges} paths={graphPaths} />
       </section>
     </AppShell>
   );

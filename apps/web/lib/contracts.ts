@@ -53,6 +53,11 @@ export type ImportPaperResponse = {
 export type GraphResponse = {
   nodes: GraphNode[];
   edges: GraphEdge[];
+  paths: {
+    id: string;
+    label: string;
+    nodeIds: string[];
+  }[];
   stats: {
     nodeCount: number;
     edgeCount: number;

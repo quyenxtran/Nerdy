@@ -29,6 +29,10 @@ export type GraphNode = {
   id: string;
   label: string;
   type: "paper" | "claim" | "method" | "descriptor" | "thesis" | "question";
+  group: string;
+  weight: number;
+  summary: string;
+  sourcePaperId?: string;
   x: number;
   y: number;
 };
@@ -38,6 +42,15 @@ export type GraphEdge = {
   from: string;
   to: string;
   relation: string;
+  weight: number;
+  evidence: string;
+  directed?: boolean;
+};
+
+export type GraphPath = {
+  id: string;
+  label: string;
+  nodeIds: string[];
 };
 
 export type WeeklyMemo = {
@@ -179,22 +192,224 @@ export const feedPapers: FeedPaper[] = [
 ];
 
 export const graphNodes: GraphNode[] = [
-  { id: "paper-a", label: "Shape descriptor paper", type: "paper", x: 9, y: 16 },
-  { id: "paper-b", label: "Carbon heterogeneity paper", type: "paper", x: 60, y: 12 },
-  { id: "method", label: "family-based validation", type: "method", x: 33, y: 33 },
-  { id: "descriptor", label: "cross descriptors", type: "descriptor", x: 55, y: 48 },
-  { id: "claim", label: "molecule-only features fail", type: "claim", x: 12, y: 57 },
-  { id: "thesis", label: "LOAO thesis", type: "thesis", x: 70, y: 71 },
-  { id: "question", label: "what transfers to AC?", type: "question", x: 34, y: 78 }
+  {
+    id: "paper-a",
+    label: "Shape descriptor paper",
+    type: "paper",
+    group: "descriptor validation",
+    weight: 0.92,
+    summary: "Tests shape-sensitive descriptors under harder extrapolation splits.",
+    sourcePaperId: "shape-descriptors-loao",
+    x: 18,
+    y: 24
+  },
+  {
+    id: "paper-b",
+    label: "Carbon heterogeneity paper",
+    type: "paper",
+    group: "adsorbent evidence",
+    weight: 0.84,
+    summary: "Shows surface chemistry can dominate molecule-only features.",
+    sourcePaperId: "carbon-surface-heterogeneity",
+    x: 65,
+    y: 20
+  },
+  {
+    id: "paper-c",
+    label: "Claim graph review",
+    type: "paper",
+    group: "knowledge graph",
+    weight: 0.74,
+    summary: "Argues for claim-level graph edges with source-backed evidence.",
+    sourcePaperId: "kg-literature-review",
+    x: 73,
+    y: 58
+  },
+  {
+    id: "method",
+    label: "family-based validation",
+    type: "method",
+    group: "descriptor validation",
+    weight: 0.78,
+    summary: "Validation split that exposes family-level extrapolation failure.",
+    sourcePaperId: "shape-descriptors-loao",
+    x: 38,
+    y: 35
+  },
+  {
+    id: "descriptor",
+    label: "cross descriptors",
+    type: "descriptor",
+    group: "descriptor validation",
+    weight: 0.88,
+    summary: "Joint molecule-adsorbent features for LOAO generalization.",
+    x: 56,
+    y: 48
+  },
+  {
+    id: "adsorbent",
+    label: "surface chemistry",
+    type: "descriptor",
+    group: "adsorbent evidence",
+    weight: 0.71,
+    summary: "Oxygen content, pore structure, acidity, and graphitic fraction.",
+    sourcePaperId: "carbon-surface-heterogeneity",
+    x: 43,
+    y: 66
+  },
+  {
+    id: "claim",
+    label: "molecule-only features fail",
+    type: "claim",
+    group: "adsorbent evidence",
+    weight: 0.72,
+    summary: "Bulk molecule descriptors can miss surface-driven uptake reversals.",
+    sourcePaperId: "carbon-surface-heterogeneity",
+    x: 20,
+    y: 60
+  },
+  {
+    id: "audit",
+    label: "evidence-backed edges",
+    type: "claim",
+    group: "knowledge graph",
+    weight: 0.67,
+    summary: "Graph edges need source excerpts before they can support citations.",
+    sourcePaperId: "kg-literature-review",
+    x: 56,
+    y: 76
+  },
+  {
+    id: "thesis",
+    label: "LOAO thesis",
+    type: "thesis",
+    group: "thesis spine",
+    weight: 1,
+    summary: "Cross descriptors should improve leave-one-adsorbate-out prediction.",
+    x: 75,
+    y: 74
+  },
+  {
+    id: "question",
+    label: "what transfers to AC?",
+    type: "question",
+    group: "thesis spine",
+    weight: 0.64,
+    summary: "Open question about whether shape descriptors transfer to activated carbon.",
+    x: 32,
+    y: 82
+  }
 ];
 
 export const graphEdges: GraphEdge[] = [
-  { id: "e1", from: "paper-a", to: "method", relation: "USES" },
-  { id: "e2", from: "paper-a", to: "descriptor", relation: "SUGGESTS" },
-  { id: "e3", from: "paper-b", to: "claim", relation: "SUPPORTS" },
-  { id: "e4", from: "claim", to: "thesis", relation: "RELEVANT_TO" },
-  { id: "e5", from: "descriptor", to: "thesis", relation: "IMPROVES" },
-  { id: "e6", from: "question", to: "thesis", relation: "ASKS_ABOUT" }
+  {
+    id: "e1",
+    from: "paper-a",
+    to: "method",
+    relation: "USES",
+    weight: 0.86,
+    evidence: "The paper evaluates leave-family-out validation alongside random splits.",
+    directed: true
+  },
+  {
+    id: "e2",
+    from: "paper-a",
+    to: "descriptor",
+    relation: "SUGGESTS",
+    weight: 0.76,
+    evidence: "Geometric descriptors reduce extrapolation errors for branched molecules.",
+    directed: true
+  },
+  {
+    id: "e3",
+    from: "paper-b",
+    to: "claim",
+    relation: "SUPPORTS",
+    weight: 0.82,
+    evidence: "Surface chemistry differences reverse expected uptake trends.",
+    directed: true
+  },
+  {
+    id: "e4",
+    from: "claim",
+    to: "thesis",
+    relation: "RELEVANT_TO",
+    weight: 0.72,
+    evidence: "Molecule-only descriptors are insufficient when adsorbent properties shift.",
+    directed: true
+  },
+  {
+    id: "e5",
+    from: "descriptor",
+    to: "thesis",
+    relation: "IMPROVES",
+    weight: 0.9,
+    evidence: "Cross descriptors connect molecule features with adsorbent-side properties.",
+    directed: true
+  },
+  {
+    id: "e6",
+    from: "question",
+    to: "thesis",
+    relation: "ASKS_ABOUT",
+    weight: 0.52,
+    evidence: "Advisor-facing question about descriptor transfer under activated carbon variation.",
+    directed: true
+  },
+  {
+    id: "e7",
+    from: "paper-c",
+    to: "audit",
+    relation: "REQUIRES",
+    weight: 0.7,
+    evidence: "Claim graph review warns that unaudited edges become hard to trust.",
+    directed: true
+  },
+  {
+    id: "e8",
+    from: "audit",
+    to: "thesis",
+    relation: "CONSTRAINS",
+    weight: 0.58,
+    evidence: "Only source-backed claims should flow into thesis memo recommendations.",
+    directed: true
+  },
+  {
+    id: "e9",
+    from: "adsorbent",
+    to: "descriptor",
+    relation: "COMBINES_WITH",
+    weight: 0.68,
+    evidence: "Adsorbent descriptors complete the cross-feature hypothesis.",
+    directed: false
+  },
+  {
+    id: "e10",
+    from: "method",
+    to: "thesis",
+    relation: "VALIDATES",
+    weight: 0.8,
+    evidence: "Family-based validation is the proof setting for the LOAO thesis.",
+    directed: true
+  }
+];
+
+export const graphPaths: GraphPath[] = [
+  {
+    id: "path-validation",
+    label: "Descriptor validation path",
+    nodeIds: ["paper-a", "method", "descriptor", "thesis"]
+  },
+  {
+    id: "path-risk",
+    label: "Adsorbent risk path",
+    nodeIds: ["paper-b", "claim", "adsorbent", "descriptor", "thesis"]
+  },
+  {
+    id: "path-audit",
+    label: "Evidence audit path",
+    nodeIds: ["paper-c", "audit", "thesis"]
+  }
 ];
 
 export const sharePosts = [

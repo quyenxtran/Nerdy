@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
-import { feedPapers, graphEdges, graphNodes } from "@/lib/mock-data";
+import { feedPapers, graphEdges, graphNodes, graphPaths } from "@/lib/mock-data";
 import { KnowledgeGraph } from "@/components/KnowledgeGraph";
 import { RepostComposer } from "@/components/RepostComposer";
 
@@ -62,7 +62,7 @@ export default async function PaperPage({ params }: { params: Promise<{ id: stri
           </div>
           <div className="panel span-12">
             <h3>Related graph preview</h3>
-            <KnowledgeGraph nodes={graphNodes} edges={graphEdges} />
+            <KnowledgeGraph nodes={graphNodes} edges={graphEdges} paths={graphPaths} compact />
           </div>
         </section>
       </article>
