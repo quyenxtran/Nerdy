@@ -6,6 +6,23 @@ Use the open-source Twitter/X recommendation architecture as inspiration for Pap
 
 Primary outcome: turn the current mock paper feed into a research-native recommendation system with user signals, candidate sources, ranking, filtering, explanations, and mixed modules.
 
+## Implementation Progress
+
+Last updated: 2026-05-07.
+
+| Status | Commit | Slice |
+| --- | --- | --- |
+| Done | `5a48f5b` | Added recommendation contracts, mock social/signal data, local recommendation pipeline, ranked feed service integration, and "Why this paper?" explanations. |
+| Done | `fcecb47` | Added `GET/POST /api/signals`, in-memory session signal storage, and feed card signal writes for save, heart, and skip. |
+| Done | `08238a9` | Wired assistant asks, paper reposts, graph node opens, and paper detail opens into normalized signal capture. |
+| Done | `af99e05` | Added feed mode query support, API feed parameters, feed tabs, and visible mixed modules from the recommendation mixer. |
+
+Next recommended slice:
+
+1. Add visibility/provenance rules for public share pages and assistant citations.
+2. Add stronger mode-specific ranking behavior for `following`, `graph-nearby`, `new-evidence`, and `contradictions`.
+3. Persist feed impressions and signals once the mock pipeline behavior is accepted.
+
 ## Sources Studied
 
 | Source | Relevant Ideas |
@@ -325,4 +342,3 @@ The UI should show the top two or three positive factors plus any major warning.
 - Do not train a neural ranker before a deterministic explainable ranker exists.
 - Do not add a database before the mock pipeline is behaviorally correct.
 - Do not expose private research notes as social proof.
-
