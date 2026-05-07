@@ -249,6 +249,7 @@ export function KnowledgeGraph({
     let isPanning = false;
     let lastPoint = { x: 0, y: 0 };
     let lastFocusId: string | null = null;
+    let canvasEl: HTMLCanvasElement | null = null;
     let energy = 1;
 
     function applyCamera() {
@@ -451,6 +452,7 @@ export function KnowledgeGraph({
       });
 
       const canvas = app.canvas as HTMLCanvasElement | undefined;
+      canvasEl = canvas ?? null;
 
       if (cancelled) {
         try {
@@ -591,17 +593,21 @@ export function KnowledgeGraph({
     let removeWheel: (() => void) | undefined;
     setup().then((cleanup) => {
       removeWheel = cleanup;
+    }).catch(() => {
+      // React Fast Refresh can cancel Pixi initialization before the renderer exists.
     });
 
     return () => {
       cancelled = true;
       removeWheel?.();
-      app.ticker?.remove(draw);
+      try {
+        app.ticker?.remove(draw);
+      } catch {
+        // The ticker may not exist if cleanup runs before app.init resolves.
+      }
 
-      const canvas = app.canvas as HTMLCanvasElement | undefined;
-
-      if (canvas?.parentNode) {
-        canvas.parentNode.removeChild(canvas);
+      if (canvasEl?.parentNode) {
+        canvasEl.parentNode.removeChild(canvasEl);
       }
 
       try {
