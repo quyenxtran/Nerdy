@@ -3,9 +3,18 @@
 import { Bookmark, Heart, MessageCircle, Repeat2, SkipForward } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import type { FeedCandidate } from "@/lib/contracts";
 import type { FeedPaper } from "@/lib/mock-data";
 
-export function PaperFeedCard({ paper, featured = false }: { paper: FeedPaper; featured?: boolean }) {
+export function PaperFeedCard({
+  paper,
+  featured = false,
+  recommendation
+}: {
+  paper: FeedPaper;
+  featured?: boolean;
+  recommendation?: FeedCandidate;
+}) {
   const [saved, setSaved] = useState(false);
   const [hearted, setHearted] = useState(false);
   const [hidden, setHidden] = useState(false);
@@ -42,6 +51,28 @@ export function PaperFeedCard({ paper, featured = false }: { paper: FeedPaper; f
         </div>
       </div>
       <p className="body-copy">{paper.takeaway}</p>
+      {recommendation ? (
+        <details className="reason-panel">
+          <summary>
+            <span>Why this paper?</span>
+            <strong>{recommendation.score.value}</strong>
+          </summary>
+          <div className="reason-list">
+            {recommendation.reasons.map((reason) => (
+              <p className={`recommendation-reason ${reason.tone}`} key={`${paper.id}-${reason.label}`}>
+                <strong>{reason.label}</strong>
+                <span>{reason.detail}</span>
+              </p>
+            ))}
+            {recommendation.socialProof.map((proof) => (
+              <p className="recommendation-reason neutral" key={`${paper.id}-${proof}`}>
+                <strong>Social proof</strong>
+                <span>{proof}</span>
+              </p>
+            ))}
+          </div>
+        </details>
+      ) : null}
       <div className="panel thesis-box">
         <strong>Why it matters</strong>
         <p className="body-copy" style={{ marginTop: 8 }}>

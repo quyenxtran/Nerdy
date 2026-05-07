@@ -353,6 +353,72 @@ h1 {
   gap: 8px;
 }
 
+.reason-panel {
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: var(--radius);
+  background: rgb(255 255 255 / 4%);
+}
+
+.reason-panel summary {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 12px;
+  color: var(--text);
+  cursor: pointer;
+  list-style: none;
+}
+
+.reason-panel summary::-webkit-details-marker {
+  display: none;
+}
+
+.reason-panel summary span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.reason-panel summary strong {
+  color: var(--teal);
+  font-family: "Cascadia Code", "Consolas", monospace;
+}
+
+.reason-list {
+  display: grid;
+  gap: 8px;
+  padding: 0 12px 12px;
+}
+
+.recommendation-reason {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 10px;
+  border-left: 2px solid rgb(255 255 255 / 14%);
+  border-radius: 6px;
+  background: rgb(7 17 15 / 42%);
+}
+
+.recommendation-reason strong {
+  font-size: 12px;
+}
+
+.recommendation-reason span {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.recommendation-reason.positive {
+  border-left-color: var(--teal);
+}
+
+.recommendation-reason.warning {
+  border-left-color: var(--gold);
+}
+
 .tag,
 .metric-pill {
   display: inline-flex;

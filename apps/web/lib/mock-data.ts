@@ -1,3 +1,5 @@
+import type { UserSignal } from "./contracts";
+
 export type PaperMetric = {
   label: string;
   value: number;
@@ -71,6 +73,70 @@ export const demoProfile = {
     "Molecule-adsorbent cross descriptors can improve leave-one-adsorbate-out generalization for organic acid adsorption on activated carbon.",
   topics: ["Adsorption ML", "Descriptor generalization", "Activated carbon", "Scientific discovery agents"]
 };
+
+export const mockUserSignals: UserSignal[] = [
+  {
+    id: "signal-save-shape",
+    type: "paper_save",
+    entityType: "paper",
+    entityId: "shape-descriptors-loao",
+    weight: 0.92,
+    createdAt: "2026-05-06T16:12:00.000Z",
+    metadata: { tags: ["LOAO", "molecular descriptors"] }
+  },
+  {
+    id: "signal-ask-carbon",
+    type: "assistant_ask",
+    entityType: "paper",
+    entityId: "carbon-surface-heterogeneity",
+    weight: 0.78,
+    createdAt: "2026-05-06T18:45:00.000Z",
+    metadata: { questionIntent: "missing evidence" }
+  },
+  {
+    id: "signal-graph-thesis",
+    type: "graph_node_open",
+    entityType: "graph_node",
+    entityId: "thesis",
+    weight: 0.74,
+    createdAt: "2026-05-07T09:20:00.000Z",
+    metadata: { source: "cockpit" }
+  }
+];
+
+export const mutedResearchTags = ["billing", "generic productivity"];
+
+export const paperSocialProof: Record<string, string[]> = {
+  "shape-descriptors-loao": [
+    "Saved by 12 researchers following descriptor generalization.",
+    "Appears in the active descriptor validation graph path."
+  ],
+  "carbon-surface-heterogeneity": [
+    "Asked about by researchers studying activated carbon.",
+    "Connected to a thesis risk about adsorbent-side variables."
+  ],
+  "kg-literature-review": [
+    "Reposted by claim-graph builders.",
+    "Useful for evidence audit and source provenance workflows."
+  ]
+};
+
+export const followedResearchers = [
+  {
+    id: "researcher-maya-shah",
+    name: "Maya Shah",
+    handle: "maya-claims",
+    focus: "Claim-level literature graphs",
+    overlapTags: ["knowledge graph", "RAG", "claims"]
+  },
+  {
+    id: "researcher-rene-malik",
+    name: "Rene Malik",
+    handle: "rene-carbon",
+    focus: "Porous carbon adsorption",
+    overlapTags: ["activated carbon", "surface chemistry"]
+  }
+];
 
 export const feedPapers: FeedPaper[] = [
   {

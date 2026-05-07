@@ -1,5 +1,90 @@
 import type { FeedPaper, GraphEdge, GraphNode } from "./mock-data";
 
+export type FeedMode = "for-you" | "following" | "graph-nearby" | "new-evidence" | "contradictions";
+
+export type SignalType =
+  | "paper_open"
+  | "paper_save"
+  | "paper_heart"
+  | "paper_skip"
+  | "assistant_ask"
+  | "paper_repost"
+  | "graph_node_open"
+  | "thesis_validate"
+  | "memo_generate"
+  | "tag_mute"
+  | "claim_report";
+
+export type SignalEntityType = "paper" | "paper_card" | "graph_node" | "graph_edge" | "tag" | "thesis" | "memo";
+
+export type UserSignal = {
+  id: string;
+  type: SignalType;
+  entityType: SignalEntityType;
+  entityId: string;
+  weight: number;
+  createdAt: string;
+  metadata?: Record<string, string | number | boolean | string[]>;
+};
+
+export type RecommendationFeature = {
+  key: string;
+  label: string;
+  value: number;
+  weight: number;
+  direction: "boost" | "penalty" | "neutral";
+};
+
+export type RecommendationScore = {
+  value: number;
+  features: RecommendationFeature[];
+};
+
+export type RecommendationReason = {
+  label: string;
+  detail: string;
+  tone: "positive" | "warning" | "neutral";
+};
+
+export type VisibilityDecision = {
+  action: "allow" | "downrank" | "label" | "interstitial" | "drop";
+  label?: string;
+  reason?: string;
+};
+
+export type FeedCandidateKind = "paper" | "graph_path" | "question" | "researcher" | "memo_prompt";
+
+export type FeedCandidate = {
+  id: string;
+  kind: FeedCandidateKind;
+  source: string;
+  paper?: FeedPaper;
+  graphPath?: {
+    id: string;
+    label: string;
+    nodeIds: string[];
+  };
+  question?: string;
+  researcher?: {
+    id: string;
+    name: string;
+    handle: string;
+    focus: string;
+  };
+  memoPrompt?: string;
+  score: RecommendationScore;
+  reasons: RecommendationReason[];
+  socialProof: string[];
+  visibility: VisibilityDecision;
+};
+
+export type FeedModule = {
+  id: string;
+  title: string;
+  kind: FeedCandidateKind | "mixed";
+  items: FeedCandidate[];
+};
+
 export type ApiErrorResponse = {
   error: {
     code: string;
@@ -16,6 +101,14 @@ export type FeedResponse = {
     topics: string[];
   };
   papers: FeedPaper[];
+  mode?: FeedMode;
+  modules?: FeedModule[];
+  generatedAt?: string;
+  debug?: {
+    candidateCount: number;
+    filteredCount: number;
+    topReasons: string[];
+  };
 };
 
 export type PaperResponse = {

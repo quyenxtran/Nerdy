@@ -7,6 +7,7 @@ import {
   sharePosts,
   thesisReport
 } from "./mock-data";
+import { buildResearchFeed } from "./recommendations";
 import type {
   AssistantAskRequest,
   AssistantAskResponse,
@@ -59,9 +60,22 @@ const reposts = new Map<string, SocialRepost>(
 );
 
 export function getFeed(): FeedResponse {
+  const rankedFeed = buildResearchFeed({
+    profile: demoProfile,
+    papers: getAllPapers()
+  });
+
   return {
     profile: demoProfile,
-    papers: [...feedPapers, ...importedPapers.values()]
+    papers: rankedFeed.papers,
+    mode: "for-you",
+    modules: rankedFeed.modules,
+    generatedAt: MOCK_NOW,
+    debug: {
+      candidateCount: rankedFeed.candidateCount,
+      filteredCount: rankedFeed.filteredCount,
+      topReasons: rankedFeed.topReasons
+    }
   };
 }
 
