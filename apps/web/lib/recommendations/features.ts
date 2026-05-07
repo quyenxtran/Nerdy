@@ -2,8 +2,66 @@ import { graphEdges, graphNodes, graphPaths } from "@/lib/mock-data";
 import type { RecommendationFeature } from "@/lib/contracts";
 import type { CandidateDraft, RecommendationContext } from "./types";
 
-const POSITIVE_SIGNAL_TYPES = new Set(["paper_save", "paper_heart", "assistant_ask", "paper_repost"]);
+const POSITIVE_SIGNAL_TYPES = new Set(["paper_open", "paper_save", "paper_heart", "assistant_ask", "paper_repost"]);
 const NEGATIVE_SIGNAL_TYPES = new Set(["paper_skip", "tag_mute", "claim_report"]);
+
+const MODE_WEIGHTS = {
+  "for-you": {
+    thesis_overlap: 0.24,
+    graph_distance: 0.18,
+    evidence_count: 0.14,
+    novelty_value: 0.12,
+    positive_signal: 0.18,
+    social_proof: 0.08,
+    recency: 0.04,
+    fatigue_penalty: -0.26,
+    weak_provenance_penalty: -0.22
+  },
+  following: {
+    thesis_overlap: 0.16,
+    graph_distance: 0.08,
+    evidence_count: 0.1,
+    novelty_value: 0.08,
+    positive_signal: 0.2,
+    social_proof: 0.24,
+    recency: 0.06,
+    fatigue_penalty: -0.28,
+    weak_provenance_penalty: -0.2
+  },
+  "graph-nearby": {
+    thesis_overlap: 0.16,
+    graph_distance: 0.36,
+    evidence_count: 0.16,
+    novelty_value: 0.1,
+    positive_signal: 0.1,
+    social_proof: 0.04,
+    recency: 0.02,
+    fatigue_penalty: -0.24,
+    weak_provenance_penalty: -0.2
+  },
+  "new-evidence": {
+    thesis_overlap: 0.14,
+    graph_distance: 0.12,
+    evidence_count: 0.24,
+    novelty_value: 0.12,
+    positive_signal: 0.1,
+    social_proof: 0.06,
+    recency: 0.2,
+    fatigue_penalty: -0.22,
+    weak_provenance_penalty: -0.28
+  },
+  contradictions: {
+    thesis_overlap: 0.16,
+    graph_distance: 0.14,
+    evidence_count: 0.14,
+    novelty_value: 0.32,
+    positive_signal: 0.08,
+    social_proof: 0.04,
+    recency: 0.04,
+    fatigue_penalty: -0.22,
+    weak_provenance_penalty: -0.24
+  }
+} satisfies Record<string, Record<string, number>>;
 
 export function hydrateFeatures(candidate: CandidateDraft, context: RecommendationContext): CandidateDraft {
   const features =
@@ -29,32 +87,37 @@ function paperFeatures(candidate: CandidateDraft, context: RecommendationContext
 
   const positiveSignal = positiveSignalValue(paper.id, paper.tags, context);
   const fatigue = fatigueValue(paper.id, paper.tags, context);
+  const weights = MODE_WEIGHTS[context.mode];
 
   return [
-    feature("thesis_overlap", "Thesis topic overlap", thesisOverlap(paper, context), 0.25, "boost"),
-    feature("graph_distance", "Graph distance to thesis", graphProximity(paper.id), 0.2, "boost"),
-    feature("evidence_count", "Evidence card count", Math.min(1, paper.cards.length / 4), 0.15, "boost"),
-    feature("novelty_value", "Novelty or contradiction value", noveltyValue(paper), 0.12, "boost"),
-    feature("positive_signal", "Positive user signal match", positiveSignal, 0.12, "boost"),
-    feature("social_proof", "Research social proof", Math.min(1, candidate.socialProof.length / 3), 0.08, "boost"),
-    feature("recency", "Paper recency", recencyValue(paper.year), 0.04, "boost"),
-    feature("fatigue_penalty", "Repeated skip or mute fatigue", fatigue, -0.1, "penalty"),
-    feature("weak_provenance_penalty", "Weak provenance penalty", paper.cards.length ? 0 : 1, -0.2, "penalty")
+    feature("thesis_overlap", "Thesis topic overlap", thesisOverlap(paper, context), weights.thesis_overlap, "boost"),
+    feature("graph_distance", "Graph distance to thesis", graphProximity(paper.id), weights.graph_distance, "boost"),
+    feature("evidence_count", "Evidence card count", Math.min(1, paper.cards.length / 4), weights.evidence_count, "boost"),
+    feature("novelty_value", "Novelty or contradiction value", noveltyValue(paper), weights.novelty_value, "boost"),
+    feature("positive_signal", "Positive user signal match", positiveSignal, weights.positive_signal, "boost"),
+    feature("social_proof", "Research social proof", Math.min(1, candidate.socialProof.length / 3), weights.social_proof, "boost"),
+    feature("recency", "Paper recency", recencyValue(paper.year), weights.recency, "boost"),
+    feature("fatigue_penalty", "Repeated skip or mute fatigue", fatigue, weights.fatigue_penalty, "penalty"),
+    feature("weak_provenance_penalty", "Weak provenance penalty", paper.cards.length ? 0 : 1, weights.weak_provenance_penalty, "penalty")
   ];
 }
 
 function moduleFeatures(candidate: CandidateDraft, context: RecommendationContext): RecommendationFeature[] {
   if (candidate.kind === "graph_path" && candidate.graphPath) {
+    const graphWeight = context.mode === "graph-nearby" ? 0.44 : 0.2;
+
     return [
-      feature("graph_distance", "Graph distance to thesis", candidate.graphPath.nodeIds.includes("thesis") ? 1 : 0.45, 0.2, "boost"),
+      feature("graph_distance", "Graph distance to thesis", candidate.graphPath.nodeIds.includes("thesis") ? 1 : 0.45, graphWeight, "boost"),
       feature("evidence_count", "Path evidence count", Math.min(1, candidate.graphPath.nodeIds.length / 5), 0.15, "boost")
     ];
   }
 
   if (candidate.kind === "researcher" && candidate.researcher) {
+    const socialWeight = context.mode === "following" ? 0.34 : 0.08;
+
     return [
       feature("thesis_overlap", "Researcher topic overlap", thesisTextIncludes(candidate.researcher.focus, context) ? 0.8 : 0.35, 0.25, "boost"),
-      feature("social_proof", "Research social proof", Math.min(1, candidate.socialProof.length / 2), 0.08, "boost")
+      feature("social_proof", "Research social proof", Math.min(1, candidate.socialProof.length / 2), socialWeight, "boost")
     ];
   }
 
