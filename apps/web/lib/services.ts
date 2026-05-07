@@ -20,6 +20,7 @@ import type {
   ImportPaperRequest,
   ImportPaperResponse,
   PaperResponse,
+  PublicRepostResponse,
   RepostResponse,
   ResolvePaperRequest,
   ResolvePaperResponse,
@@ -33,6 +34,12 @@ import type {
   WeeklyMemoResponse
 } from "./contracts";
 import type { FeedPaper } from "./mock-data";
+import {
+  citationConfidence,
+  evaluateCitationProvenance,
+  evaluatePublicRepost,
+  redactRepostForPublicShare
+} from "./visibility";
 
 const MOCK_NOW = "2026-05-07T12:00:00.000Z";
 const DEFAULT_REPOST_NOTE =
@@ -269,6 +276,20 @@ export function getRepost(postId: string): RepostResponse {
   return { repost };
 }
 
+export function getPublicRepost(postId: string): PublicRepostResponse {
+  const repost = getRepost(postId).repost;
+  const visibility = evaluatePublicRepost(repost);
+
+  if (visibility.action === "drop") {
+    throw new ApiServiceError(404, "repost_not_public", "This repost is not available as a public share page.");
+  }
+
+  return {
+    repost: redactRepostForPublicShare(repost),
+    visibility
+  };
+}
+
 export function askAssistant(input: AssistantAskRequest): AssistantAskResponse {
   const question = requireString(input.question, "question");
   const scopedPaper = input.paperId ? findPaperById(input.paperId) : undefined;
@@ -280,11 +301,18 @@ export function askAssistant(input: AssistantAskRequest): AssistantAskResponse {
   const papers = scopedPaper ? [scopedPaper] : getAllPapers().slice(0, 2);
   const primary = papers[0];
   const evidence = papers.flatMap((paper) =>
-    paper.cards.slice(0, 2).map((card) => ({
-      paperId: paper.id,
-      title: paper.title,
-      source: card.source
-    }))
+    paper.cards.slice(0, 2).map((card) => {
+      const visibility = evaluateCitationProvenance(card);
+
+      return {
+        paperId: paper.id,
+        title: paper.title,
+        source: card.source,
+        confidence: citationConfidence(card),
+        needsVerification: visibility.action !== "allow",
+        visibility
+      };
+    })
   );
 
   return {

@@ -45,11 +45,13 @@ async function askAssistant(question: string) {
 
   const result = (await response.json()) as {
     answer: string;
-    citations: Array<{ paperId: string }>;
+    citations: Array<{ paperId: string; needsVerification?: boolean; visibility?: { label?: string } }>;
   };
 
   return {
-    citations: result.citations.map((citation) => citation.paperId),
+    citations: result.citations.map((citation) =>
+      citation.needsVerification ? `${citation.paperId} (${citation.visibility?.label ?? "verify"})` : citation.paperId
+    ),
     content: result.answer
   };
 }

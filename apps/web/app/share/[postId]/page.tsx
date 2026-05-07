@@ -1,23 +1,22 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { sharePosts } from "@/lib/mock-data";
-import { getRepost } from "@/lib/services";
+import { getPublicRepost } from "@/lib/services";
 
 export default async function SharePage({ params }: { params: Promise<{ postId: string }> }) {
   const { postId } = await params;
-  const post =
-    sharePosts.find((item) => item.id === postId) ??
-    (() => {
-      try {
-        return getRepost(postId).repost;
-      } catch {
-        return undefined;
-      }
-    })();
+  const result = (() => {
+    try {
+      return getPublicRepost(postId);
+    } catch {
+      return undefined;
+    }
+  })();
 
-  if (!post) {
+  if (!result) {
     notFound();
   }
+
+  const { repost: post, visibility } = result;
 
   return (
     <main className="main">
@@ -25,6 +24,9 @@ export default async function SharePage({ params }: { params: Promise<{ postId: 
         <div className="hero-copy">
           <span className="eyebrow">{post.author} reposted a paper</span>
           <h1>{post.paper.title}</h1>
+          {visibility.action !== "allow" ? (
+            <span className="metric-pill">{visibility.label}: {visibility.reason}</span>
+          ) : null}
           <p className="lead">{post.note}</p>
           <div className="hero-actions">
             <Link className="button primary" href="/app">

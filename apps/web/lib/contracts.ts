@@ -194,6 +194,10 @@ export type RepostResponse = {
   repost: SocialRepost;
 };
 
+export type PublicRepostResponse = RepostResponse & {
+  visibility: VisibilityDecision;
+};
+
 export type AssistantAskRequest = {
   question: string;
   paperId?: string;
@@ -206,6 +210,9 @@ export type AssistantAskResponse = {
     paperId: string;
     title: string;
     source: string;
+    confidence: number;
+    needsVerification: boolean;
+    visibility: VisibilityDecision;
   }>;
   followUps: string[];
 };

@@ -1,4 +1,5 @@
 import type { FeedCandidate } from "@/lib/contracts";
+import { evaluatePaperProvenance } from "@/lib/visibility";
 import type { CandidateDraft, RecommendationContext } from "./types";
 
 export function applyVisibility(candidate: CandidateDraft, context: RecommendationContext): CandidateDraft {
@@ -16,14 +17,12 @@ export function applyVisibility(candidate: CandidateDraft, context: Recommendati
       };
     }
 
-    if (!candidate.paper.cards.length) {
+    const provenance = evaluatePaperProvenance(candidate.paper);
+
+    if (provenance.action !== "allow") {
       return {
         ...candidate,
-        visibility: {
-          action: "label",
-          label: "Needs source evidence",
-          reason: "This recommendation has no source-backed evidence cards yet."
-        }
+        visibility: provenance
       };
     }
   }
