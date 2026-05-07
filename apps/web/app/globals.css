@@ -478,6 +478,63 @@ h1 {
   font-size: 30px;
 }
 
+.feed-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: -8px 0 22px;
+}
+
+.feed-tab {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  padding: 0 12px;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 999px;
+  color: var(--muted);
+  background: rgb(255 255 255 / 4%);
+}
+
+.feed-tab.active,
+.feed-tab:hover {
+  border-color: rgb(53 226 188 / 34%);
+  color: var(--text);
+  background: rgb(53 226 188 / 9%);
+}
+
+.feed-module {
+  display: grid;
+  gap: 14px;
+}
+
+.feed-module-list {
+  display: grid;
+  gap: 10px;
+}
+
+.module-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: var(--radius);
+  background: rgb(255 255 255 / 3%);
+}
+
+.module-card strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.mini-score {
+  min-width: 46px;
+  min-height: 34px;
+  padding: 6px;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(12, 1fr);

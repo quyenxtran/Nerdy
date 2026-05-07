@@ -15,6 +15,7 @@ import type {
   CreateSignalRequest,
   CreateRepostRequest,
   FeedResponse,
+  FeedMode,
   GraphResponse,
   ImportPaperRequest,
   ImportPaperResponse,
@@ -36,6 +37,12 @@ import type { FeedPaper } from "./mock-data";
 const MOCK_NOW = "2026-05-07T12:00:00.000Z";
 const DEFAULT_REPOST_NOTE =
   "Sharing this because it connects directly to the current PaperGraph research trail.";
+
+type FeedOptions = {
+  mode?: FeedMode;
+  limit?: number;
+  debug?: boolean;
+};
 
 export class ApiServiceError extends Error {
   constructor(
@@ -65,8 +72,11 @@ const reposts = new Map<string, SocialRepost>(
   ])
 );
 
-export function getFeed(): FeedResponse {
+export function getFeed(options: FeedOptions = {}): FeedResponse {
   const rankedFeed = buildResearchFeed({
+    debug: options.debug,
+    limit: options.limit,
+    mode: options.mode,
     profile: demoProfile,
     papers: getAllPapers(),
     signals: getAllSignals()
@@ -75,7 +85,7 @@ export function getFeed(): FeedResponse {
   return {
     profile: demoProfile,
     papers: rankedFeed.papers,
-    mode: "for-you",
+    mode: options.mode ?? "for-you",
     modules: rankedFeed.modules,
     generatedAt: MOCK_NOW,
     debug: {
