@@ -4,6 +4,7 @@ import {
   graphEdges,
   graphNodes,
   graphPaths,
+  mockUserSignals,
   sharePosts,
   thesisReport
 } from "./mock-data";
@@ -11,6 +12,7 @@ import { buildResearchFeed } from "./recommendations";
 import type {
   AssistantAskRequest,
   AssistantAskResponse,
+  CreateSignalRequest,
   CreateRepostRequest,
   FeedResponse,
   GraphResponse,
@@ -20,9 +22,12 @@ import type {
   RepostResponse,
   ResolvePaperRequest,
   ResolvePaperResponse,
+  SignalResponse,
+  SignalsResponse,
   SocialRepost,
   ThesisValidateRequest,
   ThesisValidateResponse,
+  UserSignal,
   WeeklyMemoRequest,
   WeeklyMemoResponse
 } from "./contracts";
@@ -45,6 +50,7 @@ export class ApiServiceError extends Error {
 }
 
 const importedPapers = new Map<string, FeedPaper>();
+const sessionSignals = new Map<string, UserSignal>();
 const reposts = new Map<string, SocialRepost>(
   sharePosts.map((post) => [
     post.id,
@@ -62,7 +68,8 @@ const reposts = new Map<string, SocialRepost>(
 export function getFeed(): FeedResponse {
   const rankedFeed = buildResearchFeed({
     profile: demoProfile,
-    papers: getAllPapers()
+    papers: getAllPapers(),
+    signals: getAllSignals()
   });
 
   return {
@@ -77,6 +84,30 @@ export function getFeed(): FeedResponse {
       topReasons: rankedFeed.topReasons
     }
   };
+}
+
+export function createSignal(input: CreateSignalRequest): SignalResponse {
+  const type = requireSignalType(input.type);
+  const entityType = requireSignalEntityType(input.entityType);
+  const entityId = requireString(input.entityId, "entityId");
+  const weight = clampSignalWeight(input.weight ?? 1);
+  const signal: UserSignal = {
+    id: `signal-${Date.now()}-${sessionSignals.size + 1}`,
+    type,
+    entityType,
+    entityId,
+    weight,
+    createdAt: new Date().toISOString(),
+    metadata: sanitizeMetadata(input.metadata)
+  };
+
+  sessionSignals.set(signal.id, signal);
+
+  return { signal };
+}
+
+export function getSignals(): SignalsResponse {
+  return { signals: getAllSignals() };
 }
 
 export function getPaper(id: string): PaperResponse {
@@ -337,6 +368,10 @@ function getAllPapers(): FeedPaper[] {
   return [...feedPapers, ...importedPapers.values()];
 }
 
+function getAllSignals(): UserSignal[] {
+  return [...mockUserSignals, ...sessionSignals.values()];
+}
+
 function findPaperById(id: string): FeedPaper | undefined {
   return getAllPapers().find((paper) => paper.id === id);
 }
@@ -474,4 +509,71 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function isValidVisibility(value: string): value is SocialRepost["visibility"] {
   return value === "Public preview" || value === "Private draft" || value === "Lab only";
+}
+
+function requireSignalType(value: unknown): UserSignal["type"] {
+  if (
+    value === "paper_open" ||
+    value === "paper_save" ||
+    value === "paper_heart" ||
+    value === "paper_skip" ||
+    value === "assistant_ask" ||
+    value === "paper_repost" ||
+    value === "graph_node_open" ||
+    value === "thesis_validate" ||
+    value === "memo_generate" ||
+    value === "tag_mute" ||
+    value === "claim_report"
+  ) {
+    return value;
+  }
+
+  throw new ApiServiceError(400, "invalid_signal_type", "Signal type is not supported.");
+}
+
+function requireSignalEntityType(value: unknown): UserSignal["entityType"] {
+  if (
+    value === "paper" ||
+    value === "paper_card" ||
+    value === "graph_node" ||
+    value === "graph_edge" ||
+    value === "tag" ||
+    value === "thesis" ||
+    value === "memo"
+  ) {
+    return value;
+  }
+
+  throw new ApiServiceError(400, "invalid_signal_entity_type", "Signal entity type is not supported.");
+}
+
+function clampSignalWeight(value: unknown): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    throw new ApiServiceError(400, "invalid_signal_weight", "Signal weight must be a finite number.");
+  }
+
+  return Math.min(1, Math.max(0, value));
+}
+
+function sanitizeMetadata(metadata: unknown): UserSignal["metadata"] {
+  if (metadata === undefined) {
+    return undefined;
+  }
+
+  if (!isRecord(metadata)) {
+    throw new ApiServiceError(400, "invalid_signal_metadata", "Signal metadata must be an object.");
+  }
+
+  return Object.fromEntries(
+    Object.entries(metadata).filter((entry): entry is [string, string | number | boolean | string[]] => {
+      const value = entry[1];
+
+      return (
+        typeof value === "string" ||
+        typeof value === "number" ||
+        typeof value === "boolean" ||
+        (Array.isArray(value) && value.every((item) => typeof item === "string"))
+      );
+    })
+  );
 }

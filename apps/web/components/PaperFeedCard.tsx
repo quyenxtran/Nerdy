@@ -3,7 +3,7 @@
 import { Bookmark, Heart, MessageCircle, Repeat2, SkipForward } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import type { FeedCandidate } from "@/lib/contracts";
+import type { FeedCandidate, SignalType } from "@/lib/contracts";
 import type { FeedPaper } from "@/lib/mock-data";
 
 export function PaperFeedCard({
@@ -22,6 +22,24 @@ export function PaperFeedCard({
   const saveCount = metricValue("saves") + (saved ? 1 : 0);
   const questionCount = metricValue("questions");
   const repostCount = metricValue("reposts");
+
+  async function postPaperSignal(type: SignalType, weight: number) {
+    try {
+      await fetch("/api/signals", {
+        body: JSON.stringify({
+          entityId: paper.id,
+          entityType: "paper",
+          metadata: { tags: paper.tags },
+          type,
+          weight
+        }),
+        headers: { "Content-Type": "application/json" },
+        method: "POST"
+      });
+    } catch {
+      // Recommendation feedback should never block the reading flow.
+    }
+  }
 
   if (hidden) {
     return (
@@ -90,7 +108,17 @@ export function PaperFeedCard({
         <button
           aria-label={`${hearted ? "Remove heart from" : "Heart"} ${paper.title}`}
           className={hearted ? "button action-count primary" : "button action-count"}
-          onClick={() => setHearted((value) => !value)}
+          onClick={() =>
+            setHearted((value) => {
+              const next = !value;
+
+              if (next) {
+                void postPaperSignal("paper_heart", 0.65);
+              }
+
+              return next;
+            })
+          }
           title={`${saveCount} saves`}
           type="button"
         >
@@ -110,12 +138,30 @@ export function PaperFeedCard({
           <span>{repostCount}</span>
           <Repeat2 size={16} />
         </Link>
-        <button className="button icon" onClick={() => setHidden(true)} title="Skip paper" type="button">
+        <button
+          className="button icon"
+          onClick={() => {
+            void postPaperSignal("paper_skip", 0.9);
+            setHidden(true);
+          }}
+          title="Skip paper"
+          type="button"
+        >
           <SkipForward size={16} />
         </button>
         <button
           className={saved ? "button primary save-action" : "button save-action"}
-          onClick={() => setSaved((value) => !value)}
+          onClick={() =>
+            setSaved((value) => {
+              const next = !value;
+
+              if (next) {
+                void postPaperSignal("paper_save", 0.95);
+              }
+
+              return next;
+            })
+          }
           type="button"
         >
           <Bookmark size={16} />

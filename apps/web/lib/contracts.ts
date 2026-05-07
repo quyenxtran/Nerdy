@@ -27,6 +27,22 @@ export type UserSignal = {
   metadata?: Record<string, string | number | boolean | string[]>;
 };
 
+export type CreateSignalRequest = {
+  type: SignalType;
+  entityType: SignalEntityType;
+  entityId: string;
+  weight?: number;
+  metadata?: UserSignal["metadata"];
+};
+
+export type SignalResponse = {
+  signal: UserSignal;
+};
+
+export type SignalsResponse = {
+  signals: UserSignal[];
+};
+
 export type RecommendationFeature = {
   key: string;
   label: string;
