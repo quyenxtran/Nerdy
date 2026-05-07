@@ -41,6 +41,17 @@ export type SignalResponse = {
 
 export type SignalsResponse = {
   signals: UserSignal[];
+  impressions: FeedImpression[];
+};
+
+export type FeedImpression = {
+  id: string;
+  mode: FeedMode;
+  candidateId: string;
+  entityType: FeedCandidateKind;
+  entityId: string;
+  score: number;
+  createdAt: string;
 };
 
 export type RecommendationFeature = {

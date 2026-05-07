@@ -8,6 +8,12 @@ import {
   sharePosts,
   thesisReport
 } from "./mock-data";
+import {
+  appendFeedImpressions,
+  appendStoredSignal,
+  readStoredImpressions,
+  readStoredSignals
+} from "./mock-store";
 import { buildResearchFeed } from "./recommendations";
 import type {
   AssistantAskRequest,
@@ -88,11 +94,14 @@ export function getFeed(options: FeedOptions = {}): FeedResponse {
     papers: getAllPapers(),
     signals: getAllSignals()
   });
+  const mode = options.mode ?? "for-you";
+
+  appendFeedImpressions(rankedFeed, mode, new Date().toISOString());
 
   return {
     profile: demoProfile,
     papers: rankedFeed.papers,
-    mode: options.mode ?? "for-you",
+    mode,
     modules: rankedFeed.modules,
     generatedAt: MOCK_NOW,
     debug: {
@@ -119,12 +128,16 @@ export function createSignal(input: CreateSignalRequest): SignalResponse {
   };
 
   sessionSignals.set(signal.id, signal);
+  appendStoredSignal(signal);
 
   return { signal };
 }
 
 export function getSignals(): SignalsResponse {
-  return { signals: getAllSignals() };
+  return {
+    signals: getAllSignals(),
+    impressions: readStoredImpressions()
+  };
 }
 
 export function getPaper(id: string): PaperResponse {
@@ -407,7 +420,11 @@ function getAllPapers(): FeedPaper[] {
 }
 
 function getAllSignals(): UserSignal[] {
-  return [...mockUserSignals, ...sessionSignals.values()];
+  const stored = readStoredSignals();
+  const storedIds = new Set(stored.map((signal) => signal.id));
+  const sessionOnly = [...sessionSignals.values()].filter((signal) => !storedIds.has(signal.id));
+
+  return [...mockUserSignals, ...stored, ...sessionOnly];
 }
 
 function findPaperById(id: string): FeedPaper | undefined {
