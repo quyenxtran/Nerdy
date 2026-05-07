@@ -16,12 +16,16 @@ Last updated: 2026-05-07.
 | Done | `fcecb47` | Added `GET/POST /api/signals`, in-memory session signal storage, and feed card signal writes for save, heart, and skip. |
 | Done | `08238a9` | Wired assistant asks, paper reposts, graph node opens, and paper detail opens into normalized signal capture. |
 | Done | `af99e05` | Added feed mode query support, API feed parameters, feed tabs, and visible mixed modules from the recommendation mixer. |
+| Done | `878abaf` | Added provenance and visibility rules for feed items, assistant citations, and public share pages. |
+| Done | `8f634e9` | Tuned ranking weights by feed mode and increased feedback signal impact. |
+| Done | `fe455a6` | Persisted mock signals and feed impressions under ignored local storage. |
+| Done | `5149484` | Added feed feedback controls and actionable graph/research/memo module cards. |
 
 Next recommended slice:
 
-1. Add visibility/provenance rules for public share pages and assistant citations.
-2. Add stronger mode-specific ranking behavior for `following`, `graph-nearby`, `new-evidence`, and `contradictions`.
-3. Persist feed impressions and signals once the mock pipeline behavior is accepted.
+1. Add a small debug panel for `/api/signals` and recent feed impressions.
+2. Add Playwright smoke coverage for feed actions, signal persistence, and share redaction.
+3. Move persisted mock storage behind a real database adapter when the pipeline behavior is accepted.
 
 ## Sources Studied
 
