@@ -15,7 +15,16 @@ export type SignalType =
   | "tag_mute"
   | "claim_report";
 
-export type SignalEntityType = "paper" | "paper_card" | "graph_node" | "graph_edge" | "tag" | "thesis" | "memo";
+export type SignalEntityType =
+  | "paper"
+  | "paper_card"
+  | "graph_node"
+  | "graph_path"
+  | "graph_edge"
+  | "tag"
+  | "researcher"
+  | "thesis"
+  | "memo";
 
 export type UserSignal = {
   id: string;

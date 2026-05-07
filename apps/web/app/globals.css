@@ -419,6 +419,32 @@ h1 {
   border-left-color: var(--gold);
 }
 
+.feedback-row,
+.module-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.feedback-button {
+  display: inline-flex;
+  min-height: 30px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 9px;
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 4%);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.feedback-button:hover {
+  border-color: rgb(53 226 188 / 28%);
+  color: var(--text);
+  background: rgb(53 226 188 / 8%);
+}
+
 .tag,
 .metric-pill {
   display: inline-flex;
@@ -524,9 +550,13 @@ h1 {
   background: rgb(255 255 255 / 3%);
 }
 
+.module-card > div {
+  display: grid;
+  gap: 10px;
+}
+
 .module-card strong {
   display: block;
-  margin-bottom: 6px;
 }
 
 .mini-score {

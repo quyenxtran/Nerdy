@@ -1,6 +1,7 @@
 import { AppShell } from "@/components/AppShell";
+import { FeedModuleCard } from "@/components/FeedModuleCard";
 import { PaperFeedCard } from "@/components/PaperFeedCard";
-import type { FeedCandidate, FeedMode } from "@/lib/contracts";
+import type { FeedMode } from "@/lib/contracts";
 import { getFeed } from "@/lib/services";
 import Link from "next/link";
 
@@ -63,37 +64,15 @@ export default async function FeedPage({ searchParams }: { searchParams?: Promis
                 </div>
                 <span className="metric-pill">{module.items.length} items</span>
               </div>
-              <div className="feed-module-list">{module.items.map(renderModuleItem)}</div>
+              <div className="feed-module-list">
+                {module.items.map((item) => (
+                  <FeedModuleCard item={item} key={item.id} />
+                ))}
+              </div>
             </section>
           ))}
       </div>
     </AppShell>
-  );
-}
-
-function renderModuleItem(item: FeedCandidate) {
-  const title =
-    item.graphPath?.label ??
-    item.researcher?.name ??
-    item.question ??
-    item.memoPrompt ??
-    item.paper?.title ??
-    "Recommendation";
-  const detail =
-    item.graphPath?.nodeIds.join(" -> ") ??
-    item.researcher?.focus ??
-    item.reasons[0]?.detail ??
-    item.memoPrompt ??
-    "Recommendation candidate";
-
-  return (
-    <article className="module-card" key={item.id}>
-      <div>
-        <strong>{title}</strong>
-        <p className="body-copy">{detail}</p>
-      </div>
-      <span className="score mini-score">{item.score.value}</span>
-    </article>
   );
 }
 

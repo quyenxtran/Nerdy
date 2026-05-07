@@ -591,8 +591,10 @@ function requireSignalEntityType(value: unknown): UserSignal["entityType"] {
     value === "paper" ||
     value === "paper_card" ||
     value === "graph_node" ||
+    value === "graph_path" ||
     value === "graph_edge" ||
     value === "tag" ||
+    value === "researcher" ||
     value === "thesis" ||
     value === "memo"
   ) {

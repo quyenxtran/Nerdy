@@ -23,13 +23,25 @@ export function PaperFeedCard({
   const questionCount = metricValue("questions");
   const repostCount = metricValue("reposts");
 
-  async function postPaperSignal(type: SignalType, weight: number) {
+  async function postSignal({
+    type,
+    entityType = "paper",
+    entityId = paper.id,
+    weight,
+    metadata = { tags: paper.tags }
+  }: {
+    type: SignalType;
+    entityType?: "paper" | "tag";
+    entityId?: string;
+    weight: number;
+    metadata?: Record<string, string | number | boolean | string[]>;
+  }) {
     try {
       await fetch("/api/signals", {
         body: JSON.stringify({
-          entityId: paper.id,
-          entityType: "paper",
-          metadata: { tags: paper.tags },
+          entityId,
+          entityType,
+          metadata,
           type,
           weight
         }),
@@ -113,7 +125,7 @@ export function PaperFeedCard({
               const next = !value;
 
               if (next) {
-                void postPaperSignal("paper_heart", 0.65);
+                void postSignal({ type: "paper_heart", weight: 0.65 });
               }
 
               return next;
@@ -141,7 +153,7 @@ export function PaperFeedCard({
         <button
           className="button icon"
           onClick={() => {
-            void postPaperSignal("paper_skip", 0.9);
+            void postSignal({ type: "paper_skip", weight: 0.9 });
             setHidden(true);
           }}
           title="Skip paper"
@@ -156,7 +168,7 @@ export function PaperFeedCard({
               const next = !value;
 
               if (next) {
-                void postPaperSignal("paper_save", 0.95);
+                void postSignal({ type: "paper_save", weight: 0.95 });
               }
 
               return next;
@@ -166,6 +178,40 @@ export function PaperFeedCard({
         >
           <Bookmark size={16} />
           {saved ? "Saved" : "Save"}
+        </button>
+      </div>
+      <div className="feedback-row" aria-label={`Feedback for ${paper.title}`}>
+        <button
+          className="feedback-button"
+          onClick={() => {
+            void postSignal({ type: "paper_skip", weight: 0.72 });
+            setHidden(true);
+          }}
+          type="button"
+        >
+          Show less like this
+        </button>
+        <button
+          className="feedback-button"
+          onClick={() =>
+            void postSignal({
+              entityId: paper.tags[0],
+              entityType: "tag",
+              metadata: { mutedFrom: paper.id },
+              type: "tag_mute",
+              weight: 1
+            })
+          }
+          type="button"
+        >
+          Mute {paper.tags[0]}
+        </button>
+        <button
+          className="feedback-button"
+          onClick={() => void postSignal({ type: "claim_report", weight: 0.82 })}
+          type="button"
+        >
+          Weak evidence
         </button>
       </div>
     </article>
