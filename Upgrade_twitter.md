@@ -20,12 +20,13 @@ Last updated: 2026-05-07.
 | Done | `8f634e9` | Tuned ranking weights by feed mode and increased feedback signal impact. |
 | Done | `fe455a6` | Persisted mock signals and feed impressions under ignored local storage. |
 | Done | `5149484` | Added feed feedback controls and actionable graph/research/memo module cards. |
+| Done | `ddfeadc` | Added `DESIGN.md`, reimagined app/feed as a white editorial research surface, added the debug page, and refreshed feed UI on feedback writes. |
 
 Next recommended slice:
 
-1. Add a small debug panel for `/api/signals` and recent feed impressions.
-2. Add Playwright smoke coverage for feed actions, signal persistence, and share redaction.
-3. Move persisted mock storage behind a real database adapter when the pipeline behavior is accepted.
+1. Replace the local JSON adapter with a production database adapter.
+2. Add visual regression screenshots for the feed and graph.
+3. Link the Vercel project and run a production-env build through `vercel env run`.
 
 ## Sources Studied
 

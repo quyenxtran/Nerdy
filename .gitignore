@@ -10,6 +10,10 @@ coverage
 .env.*.local
 *.log
 *.tsbuildinfo
+playwright-report
+test-results
+apps/web/playwright-report
+apps/web/test-results
 storage
 wiki/users
 apps/web/.next

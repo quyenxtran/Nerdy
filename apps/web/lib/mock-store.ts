@@ -8,6 +8,14 @@ type StoreShape = {
   impressions: FeedImpression[];
 };
 
+type PersistenceAdapter = {
+  name: string;
+  readSignals: () => UserSignal[];
+  readImpressions: () => FeedImpression[];
+  appendSignal: (signal: UserSignal) => void;
+  appendFeedImpressions: (feed: MixedFeed, mode: FeedMode, createdAt: string) => void;
+};
+
 const STORE_DIR = path.join(process.cwd(), "storage", "papergraph-mock");
 const STORE_FILE = path.join(STORE_DIR, "session.json");
 const EMPTY_STORE: StoreShape = {
@@ -15,47 +23,63 @@ const EMPTY_STORE: StoreShape = {
   impressions: []
 };
 
+export const localJsonPersistenceAdapter: PersistenceAdapter = {
+  name: "local-json",
+  readSignals: () => readStore().signals,
+  readImpressions: () => readStore().impressions,
+  appendSignal(signal) {
+    const store = readStore();
+
+    writeStore({
+      ...store,
+      signals: dedupeById([...store.signals, signal]).slice(-500)
+    });
+  },
+  appendFeedImpressions(feed, mode, createdAt) {
+    const store = readStore();
+    const impressions = feed.modules.flatMap((module) =>
+      module.items.map((candidate) => ({
+        id: `impression-${createdAt}-${candidate.id}`,
+        mode,
+        candidateId: candidate.id,
+        entityType: candidate.kind,
+        entityId:
+          candidate.paper?.id ??
+          candidate.graphPath?.id ??
+          candidate.researcher?.id ??
+          candidate.question ??
+          candidate.memoPrompt ??
+          candidate.id,
+        score: candidate.score.value,
+        createdAt
+      }))
+    );
+
+    writeStore({
+      ...store,
+      impressions: dedupeById([...store.impressions, ...impressions]).slice(-1000)
+    });
+  }
+};
+
+export function getPersistenceAdapter(): PersistenceAdapter {
+  return localJsonPersistenceAdapter;
+}
+
 export function readStoredSignals(): UserSignal[] {
-  return readStore().signals;
+  return getPersistenceAdapter().readSignals();
 }
 
 export function readStoredImpressions(): FeedImpression[] {
-  return readStore().impressions;
+  return getPersistenceAdapter().readImpressions();
 }
 
 export function appendStoredSignal(signal: UserSignal) {
-  const store = readStore();
-
-  writeStore({
-    ...store,
-    signals: dedupeById([...store.signals, signal]).slice(-500)
-  });
+  getPersistenceAdapter().appendSignal(signal);
 }
 
 export function appendFeedImpressions(feed: MixedFeed, mode: FeedMode, createdAt: string) {
-  const store = readStore();
-  const impressions = feed.modules.flatMap((module) =>
-    module.items.map((candidate) => ({
-      id: `impression-${createdAt}-${candidate.id}`,
-      mode,
-      candidateId: candidate.id,
-      entityType: candidate.kind,
-      entityId:
-        candidate.paper?.id ??
-        candidate.graphPath?.id ??
-        candidate.researcher?.id ??
-        candidate.question ??
-        candidate.memoPrompt ??
-        candidate.id,
-      score: candidate.score.value,
-      createdAt
-    }))
-  );
-
-  writeStore({
-    ...store,
-    impressions: dedupeById([...store.impressions, ...impressions]).slice(-1000)
-  });
+  getPersistenceAdapter().appendFeedImpressions(feed, mode, createdAt);
 }
 
 function readStore(): StoreShape {

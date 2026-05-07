@@ -1,9 +1,11 @@
 import { AppShell } from "@/components/AppShell";
+import { getPersistenceAdapter } from "@/lib/mock-store";
 import { getFeed, getSignals } from "@/lib/services";
 
 export default function DebugPage() {
   const signalTrace = getSignals();
   const feed = getFeed({ debug: true, limit: 8 });
+  const adapter = getPersistenceAdapter();
   const recentSignals = signalTrace.signals.slice(-12).reverse();
   const recentImpressions = signalTrace.impressions.slice(-16).reverse();
 
@@ -21,7 +23,7 @@ export default function DebugPage() {
           </div>
           <aside className="feed-hero-panel">
             <span className="feed-kicker">Mock adapter</span>
-            <strong>storage/papergraph-mock</strong>
+            <strong>{adapter.name}</strong>
             <p>Signals and impressions persist locally without requiring a database migration yet.</p>
           </aside>
         </header>
