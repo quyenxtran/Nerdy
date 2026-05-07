@@ -1,6 +1,7 @@
 import {
   BadgeCheck,
   Brain,
+  Database,
   FileText,
   GitBranch,
   MessageSquare,
@@ -19,6 +20,7 @@ const navItems = [
   { href: "/app/assistant", label: "Assistant", icon: MessageSquare },
   { href: "/app/thesis-validator", label: "Thesis", icon: Brain },
   { href: "/app/memo", label: "Memo", icon: NotebookText },
+  { href: "/app/debug", label: "Debug", icon: Database },
   { href: "/app/profile", label: "Profile", icon: UserRound }
 ];
 

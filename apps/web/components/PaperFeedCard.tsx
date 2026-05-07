@@ -2,7 +2,8 @@
 
 import { Bookmark, Heart, MessageCircle, Repeat2, SkipForward } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { startTransition, useState } from "react";
 import type { FeedCandidate, SignalType } from "@/lib/contracts";
 import type { FeedPaper } from "@/lib/mock-data";
 
@@ -15,6 +16,7 @@ export function PaperFeedCard({
   featured?: boolean;
   recommendation?: FeedCandidate;
 }) {
+  const router = useRouter();
   const [saved, setSaved] = useState(false);
   const [hearted, setHearted] = useState(false);
   const [hidden, setHidden] = useState(false);
@@ -37,7 +39,7 @@ export function PaperFeedCard({
     metadata?: Record<string, string | number | boolean | string[]>;
   }) {
     try {
-      await fetch("/api/signals", {
+      const response = await fetch("/api/signals", {
         body: JSON.stringify({
           entityId,
           entityType,
@@ -48,6 +50,10 @@ export function PaperFeedCard({
         headers: { "Content-Type": "application/json" },
         method: "POST"
       });
+
+      if (response.ok) {
+        startTransition(() => router.refresh());
+      }
     } catch {
       // Recommendation feedback should never block the reading flow.
     }
