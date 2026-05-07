@@ -41,6 +41,24 @@ async function postRepost(draft: RepostDraft) {
   };
 }
 
+async function postRepostSignal(draft: RepostDraft) {
+  try {
+    await fetch("/api/signals", {
+      body: JSON.stringify({
+        entityId: draft.paper.id,
+        entityType: "paper",
+        metadata: { tags: draft.paper.tags, visibility: draft.visibility },
+        type: "paper_repost",
+        weight: 0.88
+      }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST"
+    });
+  } catch {
+    // Repost publishing should not depend on the recommendation signal write.
+  }
+}
+
 export function RepostComposer({ paper = defaultPaper }: { paper?: FeedPaper }) {
   const [note, setNote] = useState(defaultNote);
   const [visibility, setVisibility] = useState(sharePosts[0]?.visibility ?? "Public preview");
@@ -65,6 +83,7 @@ export function RepostComposer({ paper = defaultPaper }: { paper?: FeedPaper }) 
     } catch {
       setShareUrl(`/share/${localDraft.id}`);
     } finally {
+      void postRepostSignal(localDraft);
       setStatus("posted");
     }
   }

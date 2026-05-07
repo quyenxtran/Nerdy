@@ -17,6 +17,28 @@ type DisplayNode = GraphNode & {
   fixed?: boolean;
 };
 
+async function postGraphNodeSignal(node: DisplayNode) {
+  try {
+    await fetch("/api/signals", {
+      body: JSON.stringify({
+        entityId: node.baseId,
+        entityType: "graph_node",
+        metadata: {
+          group: node.group,
+          nodeType: node.type,
+          sourcePaperId: node.sourcePaperId ?? ""
+        },
+        type: "graph_node_open",
+        weight: 0.7
+      }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST"
+    });
+  } catch {
+    // Graph exploration should stay responsive if the signal API is unavailable.
+  }
+}
+
 type DisplayEdge = {
   id: string;
   from: string;
@@ -467,6 +489,7 @@ export function KnowledgeGraph({
             energy = 0.7;
             setSelectedId(node.baseId);
             setFocusId(node.baseId);
+            void postGraphNodeSignal(node);
             event.stopPropagation();
           });
         }

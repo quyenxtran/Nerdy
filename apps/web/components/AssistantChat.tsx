@@ -54,6 +54,24 @@ async function askAssistant(question: string) {
   };
 }
 
+async function postAssistantSignal(question: string) {
+  try {
+    await fetch("/api/signals", {
+      body: JSON.stringify({
+        entityId: "active-thesis",
+        entityType: "thesis",
+        metadata: { questionLength: question.length, source: "assistant" },
+        type: "assistant_ask",
+        weight: 0.78
+      }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST"
+    });
+  } catch {
+    // Assistant signals improve ranking, but questions must still work without them.
+  }
+}
+
 function fallbackAnswer(question: string): Pick<ChatMessage, "content" | "citations"> {
   const normalized = question.toLowerCase();
 
@@ -100,6 +118,7 @@ export function AssistantChat() {
     setMessages((current) => [...current, userMessage]);
     setDraft("");
     setStatus("thinking");
+    void postAssistantSignal(trimmed);
 
     try {
       const result = await askAssistant(trimmed);

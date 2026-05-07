@@ -3,6 +3,7 @@ import { AppShell } from "@/components/AppShell";
 import { feedPapers, graphEdges, graphNodes, graphPaths } from "@/lib/mock-data";
 import { KnowledgeGraph } from "@/components/KnowledgeGraph";
 import { RepostComposer } from "@/components/RepostComposer";
+import { SignalBeacon } from "@/components/SignalBeacon";
 
 export default async function PaperPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -14,6 +15,7 @@ export default async function PaperPage({ params }: { params: Promise<{ id: stri
 
   return (
     <AppShell active="paper">
+      <SignalBeacon entityId={paper.id} entityType="paper" metadata={{ tags: paper.tags }} type="paper_open" weight={0.55} />
       <article className="dashboard">
         <header className="topbar">
           <div>
